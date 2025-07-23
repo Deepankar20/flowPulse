@@ -1,5 +1,5 @@
-export default function authenticateConn() {
+export default function authenticateEvent(apiKey: string): string {
 
     
-
+  return apiKey;
 }
