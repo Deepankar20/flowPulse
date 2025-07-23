@@ -1,6 +1,6 @@
 import { WebSocket, WebSocketServer } from "ws";
 import http from "http";
-import visitEvent from "./events/visitEvent";
+import viewPageEvent from "./events/viewPageEvent";
 import type { Request } from "express";
 
 const server = http.createServer();
@@ -19,8 +19,12 @@ wss.on("connection", (ws: WebSocket) => {
         //captureEvent(msg.id, msg.metadata);
         break;
 
-      case "visit":
-        visitEvent({ pathname: msg.pathname, apiKey: msg.apiKey, socket: ws });
+      case "viewpage":
+        viewPageEvent({
+          metadata: msg.metadata,
+          apiKey: msg.apiKey,
+          socket: ws,
+        });
         break;
     }
   });
@@ -32,9 +36,6 @@ server.on("upgrade", (req: Request) => {
   const ip = req.headers["location"] || req.socket.remoteAddress;
   console.log(ip);
 });
-
-//for authenticating the conn req from the various clients
-//so that we know which user is connecting to which org.
 
 server.listen(PORT, () => {
   console.log(`WS server running on port ${PORT}`);

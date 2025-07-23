@@ -1,13 +1,14 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { getUserMetaData } from "../utils/getUserMetadata";
 
 type FlowPulseContextType = {
   user: string | null;
   setUser: (user: string | null) => void;
   apiKey: string;
-  visit: (location: string, apiKey: string) => void;
-  capture: () => void;
+  viewPage: () => void;
+  capture: (eventType: string, eventData: object) => void;
 };
 
 type FlowPulseProviderType = {
@@ -55,32 +56,18 @@ export const FlowPulseProvider = ({
 
   useEffect(() => {
     if (isReady) {
-      visit(location.pathname, apiKey);
+      viewPage();
     }
   }, [location, isReady, apiKey]);
 
-  function getUserMetaData() {
-    return {
-      url: window.location.href, // Full page URL
-      path: window.location.pathname, // Route path
-      referrer: document.referrer || null, // Previous page
-      userAgent: navigator.userAgent, // Browser/device
-      language: navigator.language, // Browser language
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
-      screen: {
-        width: window.screen.width,
-        height: window.screen.height,
-      },
-      // Geolocation is async and permission-based, see below for details
-    };
-  }
-
-  const visit = (pathname: string, apiKey: string) => {
+  const viewPage = () => {
     if (wsRef.current && wsRef.current.readyState === wsRef.current?.OPEN) {
       try {
+        const metadata = getUserMetaData();
+
         const payload = {
-          type: "visit",
-          pathname,
+          type: "viewpage",
+          metadata,
           apiKey,
         };
 
@@ -93,11 +80,28 @@ export const FlowPulseProvider = ({
     }
   };
 
-  const capture = () => {};
+  const capture = (eventType: string, eventData: object) => {
+    if (wsRef.current && wsRef.current.readyState === wsRef.current.OPEN) {
+      try {
+        const metadata = getUserMetaData();
+
+        const payload = {
+          type: "capture",
+          metadata,
+          eventType,
+          eventData,
+        };
+
+        const message = JSON.stringify(payload);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
 
   return (
     <FlowPulseContext.Provider
-      value={{ user, setUser, apiKey, visit, capture }}
+      value={{ user, setUser, apiKey, viewPage, capture }}
     >
       {children}
     </FlowPulseContext.Provider>
