@@ -5,6 +5,8 @@ export type viewPageEventType = {
   apiKey: string;
   metadata: userMetadataType;
   socket: WebSocket;
+  userId: string | null;
+  distinctId: string | null;
 };
 
 export type captureEventType = {
@@ -13,14 +15,16 @@ export type captureEventType = {
   socket: WebSocket;
   eventType: string;
   eventData: string;
+  userId: string | null;
+  distinctId: string | null;
 };
 
 type userMetadataType = {
-  url: string; // Full page URL
-  path: string; // Route path
-  referrer: string | null; // Previous page
-  userAgent: string; // Browser/device
-  language: string; // Browser language
+  url: string;
+  path: string;
+  referrer: string | null;
+  userAgent: string;
+  language: string;
   timezone: Date | null;
   screen: {
     width: number;

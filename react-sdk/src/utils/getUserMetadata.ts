@@ -10,6 +10,6 @@ export function getUserMetaData() {
         width: window.screen.width,
         height: window.screen.height,
       },
-      timestap: Date.now(),
+      timestamp: Date.now(),
     };
   }

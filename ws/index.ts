@@ -24,8 +24,14 @@ wss.on("connection", (ws: WebSocket) => {
           metadata: msg.metadata,
           apiKey: msg.apiKey,
           socket: ws,
+          userId: msg.userId,
+          distinctId: msg.distinctId,
         });
         break;
+      
+
+      case "auth":
+        
     }
   });
 });

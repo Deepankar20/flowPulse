@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { getUserMetaData } from "../utils/getUserMetadata";
+import { getOrCreateDistinctId } from "../utils/getDistinctId";
 
 type FlowPulseContextType = {
   user: string | null;
@@ -27,10 +28,14 @@ export const FlowPulseProvider = ({
   const [user, setUser] = useState<string | null>(null);
   const [isReady, setIsReady] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const [distinctId, setDistinctId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const location = useLocation();
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080");
+    const newDistictId = getOrCreateDistinctId();
+    setDistinctId(newDistictId);
 
     socket.onopen = () => setIsReady(true);
     socket.onclose = () => setIsReady(false);
@@ -69,6 +74,8 @@ export const FlowPulseProvider = ({
           type: "viewpage",
           metadata,
           apiKey,
+          distinctId,
+          userId,
         };
 
         const message = JSON.stringify(payload);
@@ -90,13 +97,23 @@ export const FlowPulseProvider = ({
           metadata,
           eventType,
           eventData,
+          distinctId,
+          userId,
         };
 
         const message = JSON.stringify(payload);
+
+        wsRef.current.send(message);
       } catch (error) {
         console.error(error);
       }
     }
+  };
+
+  const identify = (userId: string, distinctId: string) => {
+
+    
+
   };
 
   return (
