@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "bun run --watch index.ts",
-    "worker" : "bun run --watch ./workers/viewPageWorker.ts"
+    "worker": "bun run --watch ./workers/viewPageWorker.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -21,6 +21,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "ioredis": "^5.6.1",
-    "redis": "^5.6.0"
+    "redis": "^5.6.0",
+    "zod": "^4.0.10"
   }
 }

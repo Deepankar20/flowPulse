@@ -22,11 +22,12 @@ model AppOwner {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  events    Event[]
+  id         Int      @id @default(autoincrement())
+  email      String?  @unique
+  name       String?
+  createdAt  DateTime @default(now())
+  events     Event[]
+  properties Json?
 }
 
 model Project {
@@ -42,7 +43,7 @@ model Project {
 model Event {
   id         Int      @id @default(autoincrement())
   event      String
-  distinctId String
+  distinctId String   @unique
   timestamp  DateTime @default(now())
   project    Project  @relation(fields: [projectId], references: [id])
   projectId  Int
