@@ -17,15 +17,19 @@ export const FlowPulseProvider = ({
   const wsRef = useRef<WebSocket | null>(null);
   const [distinctId, setDistinctId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const sessionStartRef = useRef<number>(0);
   const location = useLocation();
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080");
     const newDistictId = getOrCreateDistinctId();
     setDistinctId(newDistictId);
+    sessionStartRef.current = Date.now();
 
     socket.onopen = () => setIsReady(true);
-    socket.onclose = () => setIsReady(false);
+    socket.onclose = () => {
+      setIsReady(false);
+    };
 
     /** 
     socket.onmessage = (event) => {
@@ -40,9 +44,12 @@ export const FlowPulseProvider = ({
     */
 
     wsRef.current = socket;
+    window.addEventListener("beforeunload", beforeUnload);
 
     return () => {
+      beforeUnload();
       socket.close();
+      window.removeEventListener("beforeunload", beforeUnload);
     };
   }, []);
 
@@ -51,6 +58,17 @@ export const FlowPulseProvider = ({
       viewPage();
     }
   }, [location, isReady, apiKey]);
+
+  const beforeUnload = () => {
+    const payload = {
+      type: "session",
+      data: sessionStartRef.current,
+    };
+
+    if (wsRef.current && wsRef.current.readyState === wsRef.current.OPEN) {
+      wsRef.current.send(JSON.stringify(payload));
+    }
+  };
 
   const viewPage = () => {
     if (wsRef.current && wsRef.current.readyState === wsRef.current?.OPEN) {
@@ -97,11 +115,32 @@ export const FlowPulseProvider = ({
     }
   };
 
-  const identify = (userId: string, distinctId: string) => {};
+  const identify = async (distinctId: string, properties: object) => {
+    try {
+      const res = await fetch(`${process.env.BACKEND_URL}/user/identify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          distinctId,
+          apiKey,
+          properties,
+        }),
+      });
+
+      if (!res.ok) return null;
+
+      const data = await res.json();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <FlowPulseContext.Provider
-      value={{ user, setUser, apiKey, viewPage, capture }}
+      value={{ user, setUser, apiKey, viewPage, capture, identify }}
     >
       {children}
     </FlowPulseContext.Provider>
