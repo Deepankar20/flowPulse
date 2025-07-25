@@ -14,7 +14,7 @@ export type captureEventType = {
   metadata: userMetadataType;
   socket: WebSocket;
   eventType: string;
-  eventData: string;
+  eventData: object;
   userId: string | null;
   distinctId: string | null;
 };

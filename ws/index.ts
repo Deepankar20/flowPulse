@@ -1,6 +1,7 @@
 import { WebSocket, WebSocketServer } from "ws";
 import http from "http";
 import viewPageEvent from "./events/viewPageEvent";
+import { formatDuration } from "./utils/formatDuration";
 
 const PORT = 8080;
 const server = http.createServer();
@@ -10,9 +11,11 @@ wss.on("connection", (ws: WebSocket) => {
   ws.on("error", console.error);
 
   ws.on("message", (data) => {
-    // handle Buffer or string
     const message = typeof data === "string" ? data : data.toString();
     const msg = JSON.parse(message);
+
+    if (msg.role === "admin") {
+    }
 
     switch (msg.type) {
       case "capture":
@@ -28,6 +31,12 @@ wss.on("connection", (ws: WebSocket) => {
           distinctId: msg.distinctId,
         });
         break;
+
+      case "session":
+        console.log(
+          "session Duration : ",
+          formatDuration(Date.now() - msg.data)
+        );
     }
   });
 });

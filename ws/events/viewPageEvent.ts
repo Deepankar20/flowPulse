@@ -18,6 +18,7 @@ export default async function viewPageEvent({
 
     const sockets = apiKeyToSockets.get(apiKey);
     if (sockets) {
+      
       for (const ws of sockets) {
         const payload = {
           type: "pageview-dashboard",
