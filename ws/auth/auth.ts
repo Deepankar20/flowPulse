@@ -4,7 +4,7 @@ export default async function authenticateApiKey(
   apiKey: string
 ): Promise<string | null> {
   try {
-    const res = await fetch("http://localhost:3000/api/auth/validate-api-key", {
+    const res = await fetch("", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -20,8 +20,7 @@ export default async function authenticateApiKey(
     if (!data) {
       return null;
     }
-
-    if (data.valid) {
+    if (data) {
       return apiKey;
     } else {
       return null;

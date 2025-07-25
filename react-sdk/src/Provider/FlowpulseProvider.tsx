@@ -1,21 +1,8 @@
-import React, { createContext, useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getUserMetaData } from "../utils/getUserMetadata";
 import { getOrCreateDistinctId } from "../utils/getDistinctId";
-
-type FlowPulseContextType = {
-  user: string | null;
-  setUser: (user: string | null) => void;
-  apiKey: string;
-  viewPage: () => void;
-  capture: (eventType: string, eventData: object) => void;
-};
-
-type FlowPulseProviderType = {
-  apiKey: string;
-  children: ReactNode;
-};
+import type { FlowPulseContextType, FlowPulseProviderType } from "../types";
 
 const FlowPulseContext = createContext<FlowPulseContextType | undefined>(
   undefined
@@ -110,11 +97,7 @@ export const FlowPulseProvider = ({
     }
   };
 
-  const identify = (userId: string, distinctId: string) => {
-
-    
-
-  };
+  const identify = (userId: string, distinctId: string) => {};
 
   return (
     <FlowPulseContext.Provider
