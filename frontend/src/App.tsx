@@ -5,6 +5,7 @@ import SignInPage from "./pages/SignIn";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "@clerk/clerk-react";
+import ProjectAnalytics from "./pages/ProjectAnalytics";
 
 function App() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -21,10 +22,18 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route
-          path="/dashboard"
+          path="/project/:projectId/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/project/:projectId/analytics"
+          element={
+            <ProtectedRoute>
+              <ProjectAnalytics />
             </ProtectedRoute>
           }
         />
