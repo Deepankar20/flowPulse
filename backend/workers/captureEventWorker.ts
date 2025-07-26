@@ -30,7 +30,7 @@ export const captureEventWorker = new Worker(
       const apiKey = data.apiKey;
 
       const tx = await prisma.$transaction(async (tx) => {
-        const project = await prisma.project.findFirst({
+        const project = await prisma.project.findUnique({
           where: {
             apiKey,
           },
@@ -47,6 +47,7 @@ export const captureEventWorker = new Worker(
             projectId: project.id,
             userId: data.userId,
             distinctId: data.distictId,
+            timestamp: new Date(data.metadata.timestamp),
           },
         });
       });

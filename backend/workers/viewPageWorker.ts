@@ -30,7 +30,7 @@ export const viewPageWorker = new Worker(
       const apiKey = data.apiKey;
 
       const tx = await prisma.$transaction(async (tx) => {
-        const project = await prisma.project.findFirst({
+        const project = await prisma.project.findUnique({
           where: {
             apiKey,
           },
@@ -42,7 +42,7 @@ export const viewPageWorker = new Worker(
 
         const pushEvent = await prisma.event.create({
           data: {
-            event: "pageview",
+            event: "viewpage",
             properties: data.metadata,
             projectId: project.id,
             userId: data.userId,

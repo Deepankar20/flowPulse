@@ -15,8 +15,8 @@ export const getAllEventsSchema = z.object({
 export const getEventsGroupByValue = z.object({
   projectId: z.number(),
   value: z.string(),
-  fromDate: z.date(),
-  toDate: z.date(),
+  fromDate: z.preprocess((val) => new Date(val as string), z.date()),
+  toDate: z.preprocess((val) => new Date(val as string), z.date()),
   eventType: z.string(),
 });
 
@@ -43,9 +43,23 @@ export const viewPageSchema = z.object({
   distictId: z.string(),
 });
 
+const userMetadataSchema = z.object({
+  url: z.string(),
+  path: z.string(),
+  referrer: z.string().nullable(),
+  userAgent: z.string(),
+  language: z.string(),
+  timezone: z.date().nullable(), // Date or null
+  screen: z.object({
+    width: z.number(),
+    height: z.number(),
+  }),
+  timestamp: z.number(), // Number (as per your requirements)
+});
+
 export const captureEventSchema = z.object({
   apiKey: z.string(),
-  metadata: z.object(),
+  metadata: userMetadataSchema,
   userId: z.number() || z.null(),
   distictId: z.string(),
   eventType: z.string(),
