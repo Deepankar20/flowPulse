@@ -30,4 +30,5 @@ type userMetadataType = {
     width: number;
     height: number;
   };
+  timestamp: number;
 };

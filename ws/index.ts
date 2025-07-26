@@ -2,6 +2,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import http from "http";
 import viewPageEvent from "./events/viewPageEvent";
 import { formatDuration } from "./utils/formatDuration";
+import captureEvent from "./events/captureEvent";
 
 const PORT = 8080;
 const server = http.createServer();
@@ -19,7 +20,15 @@ wss.on("connection", (ws: WebSocket) => {
 
     switch (msg.type) {
       case "capture":
-        //captureEvent(msg.id, msg.metadata);
+        captureEvent({
+          metadata: msg.metadata,
+          apiKey: msg.apiKey,
+          socket: ws,
+          userId: msg.userId,
+          distinctId: msg.distinctId,
+          eventData: msg.eventData,
+          eventType: msg.eventType,
+        });
         break;
 
       case "viewpage":

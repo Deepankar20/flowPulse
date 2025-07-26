@@ -38,10 +38,13 @@ export default async function captureEvent({
     const job = await captureEventsQueue.add(
       "captureEvent",
       {
+        type: "capture-dashboard",
         metadata,
         apiKey,
         distinctId,
         userId,
+        eventData,
+        eventType,
       },
       {
         removeOnComplete: true,
