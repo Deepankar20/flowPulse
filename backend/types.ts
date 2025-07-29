@@ -1,4 +1,5 @@
-import z from "zod";
+import z, { nullable } from "zod";
+import type { Request } from "express";
 
 export const identifyReqBodySchema = z.object({
   distinctId: z.string(),
@@ -64,4 +65,20 @@ export const captureEventSchema = z.object({
   distictId: z.string(),
   eventType: z.string(),
   eventData: z.object(),
+});
+
+interface appOwner {
+  id: number;
+  name: string;
+  email: string;
+  clerkUserId: string;
+}
+
+export interface AuthRequest extends Request {
+  user?: appOwner;
+}
+
+export const createProjectSchema = z.object({
+  name: z.string(),
+  description: z.string(),
 });

@@ -32,13 +32,14 @@ model User {
 }
 
 model Project {
-  id         Int       @id @default(autoincrement())
-  name       String
-  apiKey     String    @unique
-  createdAt  DateTime  @default(now())
-  events     Event[]
-  AppOwner   AppOwner? @relation(fields: [appOwnerId], references: [id])
-  appOwnerId Int?
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  apiKey      String    @unique
+  createdAt   DateTime  @default(now())
+  events      Event[]
+  AppOwner    AppOwner? @relation(fields: [appOwnerId], references: [id])
+  appOwnerId  Int?
 }
 
 model Event {
