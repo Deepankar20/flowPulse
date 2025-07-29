@@ -61,13 +61,11 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
       </div>
 
       {/* Top Row - Main Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Page Views Chart */}
         <div className="bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700">
-          <h3 className="text-lg font-semibold text-white mb-4">
-            Page Views Over Time
-          </h3>
-          <div style={{ height: "550px" }}>
+          <h3 className="text-lg font-semibold text-white mb-4">Page Views</h3>
+          <div style={{ height: "450px" }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -104,9 +102,9 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
         {/* Revenue Chart */}
         <div className="bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700">
           <h3 className="text-lg font-semibold text-white mb-4">
-            Revenue Growth
+            Unique Visitors
           </h3>
-          <div style={{ height: "550px" }}>
+          <div style={{ height: "450px" }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -147,7 +145,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
         {/* Users Chart */}
         <div className="bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700">
           <h3 className="text-lg font-semibold text-white mb-4">User Growth</h3>
-          <div style={{ height: "350px" }}>
+          <div style={{ height: "450px" }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />

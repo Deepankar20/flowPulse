@@ -17,30 +17,25 @@ const SocketProvider = ({ children }: SocketProviderType) => {
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const socket = new WebSocket("ws://localhost:8080");
-  
+    const socket = new WebSocket(
+      "ws://localhost:8080?role=admin&apiKey=test-api-key"
+    );
 
     socket.onopen = () => setIsReady(true);
     socket.onclose = () => setIsReady(false);
 
-    /** 
-  const wsRef = useState(
     socket.onmessage = (event) => {
       try {
-        const type = event.type;
-
+        console.log("viewpage Event : ", event.data);
       } catch (error) {
         console.error(error);
       }
     };
 
-    */
-
     wsRef.current = socket;
     setSocket(socket);
 
     return () => {
-
       socket.close();
     };
   }, []);
