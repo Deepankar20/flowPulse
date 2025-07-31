@@ -13,11 +13,14 @@ export interface Project {
   id: number;
   name: string;
   description: string;
-  status: "Active" | "Completed" | "On Hold" | "Pending";
-  progress: number;
-  dueDate: string;
-  team: string[];
-  priority: "High" | "Medium" | "Low";
-  category: string;
-  lastUpdated: string;
+  events?: [];
+  createdAt: string;
+  apiKey: string;
+}
+
+export interface TableData {
+  id: number;
+  path: string;
+  visitors: number;
+  views: number;
 }

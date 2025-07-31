@@ -37,25 +37,37 @@ export type captureEventType = {
   distinctId: string | null;
 };
 
-export const viewPageSchema = z.object({
-  apiKey: z.string(),
-  metadata: z.object(),
-  userId: z.number() || z.null(),
-  distictId: z.string(),
-});
-
 const userMetadataSchema = z.object({
   url: z.string(),
   path: z.string(),
   referrer: z.string().nullable(),
   userAgent: z.string(),
   language: z.string(),
-  timezone: z.date().nullable(), // Date or null
+  timezone: z.string(),
   screen: z.object({
     width: z.number(),
     height: z.number(),
   }),
   timestamp: z.number(), // Number (as per your requirements)
+});
+
+export const viewPageSchema = z.object({
+  apiKey: z.string(),
+  metadata: z.object({
+    url: z.string(),
+    path: z.string(),
+    referrer: z.string().nullable(),
+    userAgent: z.string(),
+    language: z.string(),
+    timezone: z.string(),
+    screen: z.object({
+      width: z.number(),
+      height: z.number(),
+    }),
+    timestamp: z.number(),
+  }),
+  userId: z.number().nullable(), // Allow null for anonymous users
+  distinctId: z.string(),
 });
 
 export const captureEventSchema = z.object({
@@ -81,4 +93,11 @@ export interface AuthRequest extends Request {
 export const createProjectSchema = z.object({
   name: z.string(),
   description: z.string(),
+});
+
+export const pageViewCountSchema = z.object({
+  projectId: z.number(),
+
+  fromDate: z.preprocess((val) => new Date(val as string), z.date()),
+  toDate: z.preprocess((val) => new Date(val as string), z.date()),
 });

@@ -28,10 +28,6 @@ server.on("upgrade", (req, socket, head) => {
 
   wss.handleUpgrade(req, socket, head, async (ws) => {
     if (query.role === "admin" && apiKey) {
-      console.log("new conn", ws);
-      console.log(apiKeyToSockets);
-      
-
       if (!apiKeyToSockets.has(apiKey)) {
         // const validate = await validateApiKey(apiKey);
         const validate = true;
@@ -61,7 +57,6 @@ server.on("upgrade", (req, socket, head) => {
 
 function handleConnection(ws: WebSocket) {
   ws.on("error", console.error);
-  console.log(apiKeyToSockets);
 
   ws.on("message", (data) => {
     const message = typeof data === "string" ? data : data.toString();
@@ -84,17 +79,16 @@ function handleConnection(ws: WebSocket) {
         viewPageEvent({
           metadata: msg.metadata,
           apiKey: msg.apiKey,
-          socket: ws,
           userId: msg.userId,
           distinctId: msg.distinctId,
         });
         break;
 
       case "session":
-        console.log(
-          "session Duration : ",
-          formatDuration(Date.now() - msg.data)
-        );
+        // console.log(
+        //   "session Duration : ",
+        //   formatDuration(Date.now() - msg.data)
+        // );
         break;
     }
   });

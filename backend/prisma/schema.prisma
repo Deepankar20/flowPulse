@@ -45,11 +45,25 @@ model Project {
 model Event {
   id         Int      @id @default(autoincrement())
   event      String
-  distinctId String   @unique
+  distinctId String   
   timestamp  DateTime @default(now())
   project    Project  @relation(fields: [projectId], references: [id])
   projectId  Int
   user       User?    @relation(fields: [userId], references: [id])
   userId     Int?
-  properties Json
+  
+  url        String?
+  path       String?
+  referrer   String?
+  useragent  String?
+  language   String?
+  timezone   String?
+  screenWidth  Int?
+  screenHeight Int?
+  
+  properties Json?
+  
+  @@index([event, projectId, timestamp])
+  @@index([path, projectId, timestamp])
+  @@index([url, projectId, timestamp])
 }

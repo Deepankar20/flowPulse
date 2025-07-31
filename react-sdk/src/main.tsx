@@ -9,7 +9,7 @@ import { BrowserRouter } from "react-router-dom";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <FlowPulseProvider apiKey={"new-api-key"}>
+      <FlowPulseProvider apiKey={"apikey_e12b3886-baf4-418b-b8f4-2f3b77b18824"}>
         <App />
       </FlowPulseProvider>
     </BrowserRouter>

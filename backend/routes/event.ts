@@ -4,9 +4,11 @@ import prisma from "../db/db";
 import {
   getAllEventsSchema,
   getEventsGroupByValue,
+  pageViewCountSchema,
   type AuthRequest,
 } from "../types";
 import { authMiddleware } from "../middleware/authMiddleware";
+import { Prisma } from "@prisma/client";
 
 export const eventRouter = Router();
 
@@ -53,7 +55,7 @@ eventRouter.post(
 );
 
 eventRouter.post(
-  "/getEventsGroupByValue",
+  "/getPathsInfo",
   authMiddleware,
   async (req: AuthRequest, res: Response) => {
     try {
@@ -71,38 +73,39 @@ eventRouter.post(
 
       const result = await prisma.$queryRaw<
         {
-          key: string;
-          count: number;
-          uniqueVisitors: number;
+          path: string | null;
+          views: bigint;
+          visitors: bigint;
         }[]
       >`
- SELECT 
-        properties->>'${value}' AS key,
-        COUNT(*) AS count,
-        COUNT(DISTINCT "distinctId") AS uniqueVisitors
-      FROM "Event"
-      WHERE 
-        "timestamp" >= ${fromDate}
-        AND "timestamp" < ${toDate}
-        AND "projectId" = ${projectId}
-        AND "event" = ${eventType}
-      GROUP BY key
-      HAVING key IS NOT NULL
-      ORDER BY count DESC;
-    `;
+SELECT 
+  "path",
+  COUNT(*) AS views,
+  COUNT(DISTINCT "distinctId") AS visitors
+FROM "Event"
+WHERE 
+  "timestamp" >= ${fromDate}
+  AND "timestamp" <= ${toDate}
+  AND "event" = 'viewpage'
+  AND "projectId" = ${projectId}
+  AND "path" IS NOT NULL
+GROUP BY "path"
+ORDER BY views DESC;
+`;
 
-      if (!result) {
-        res.status(404).json({
-          msg: "Events Not Found",
-          data: null,
-        });
-      }
+      const cleaned = result.map((row: any) => ({
+        path: row.path,
+        views: Number(row.views),
+        visitors: Number(row.visitors),
+      }));
 
       res.status(200).json({
-        msg: "Successfully Fetched All Events",
-        data: result,
+        msg: "Successfully Fetched Events by Value",
+        data: cleaned,
       });
     } catch (error) {
+      console.error("Error fetching events:", error);
+
       res.status(500).json({
         msg: "Internal Server Error",
         data: null,
@@ -127,32 +130,44 @@ eventRouter.post(
       }
 
       const { projectId, value, fromDate, toDate, eventType } = data;
+      // const result = await prisma.event
 
       const result = await prisma.$queryRaw<
-        { day: string; count: number | BigInt }[]
-      >`SELECT 
-        DATE("timestamp") AS day,
-        COUNT(*) AS count
+        { path: string | null; visitors: bigint }[]
+      >(Prisma.sql`
+      SELECT 
+      ${Prisma.sql([value])},
+        COUNT(DISTINCT "distinctId") AS visitors
       FROM "Event"
-      WHERE
-        "event" = 'viewpage'
+      WHERE 
+        "timestamp" >= ${fromDate}
+        AND "timestamp" <= ${toDate}
+        AND "event" = 'viewpage'
         AND "projectId" = ${projectId}
-        AND "timestamp" BETWEEN ${fromDate} AND ${toDate}
-      GROUP BY day
-      ORDER BY day ASC;`;
+        AND "${Prisma.raw(value)}" IS NOT NULL
+      GROUP BY ${Prisma.sql([value])}
+      ORDER BY visitors DESC;
+    `);
 
       if (!result) {
-        res.status(404).json({
+        return res.status(404).json({
           msg: "Events Not Found",
           data: null,
         });
       }
 
+      const cleaned = result.map((row: any) => ({
+        path: row[value],
+        visitors: Number(row.visitors),
+      }));
+
       res.status(200).json({
         msg: "Successfully Fetched Viewpage Events",
-        data: result,
+        data: cleaned,
       });
     } catch (error) {
+      console.log(error);
+
       res.status(500).json({
         msg: "Internal Server Error",
         data: null,
@@ -179,7 +194,7 @@ eventRouter.post(
       const { projectId, value, fromDate, toDate, eventType } = data;
 
       const result = await prisma.$queryRaw<
-        { day: string; uniqueVisitors: number | BigInt }[]
+        { day: string; uniqueVisitors: number }[]
       >`
           SELECT
             DATE("timestamp") AS day,
@@ -203,6 +218,73 @@ eventRouter.post(
       res.status(200).json({
         msg: "Successfully Fetched Viewpage Events",
         data: result,
+      });
+    } catch (error) {
+      res.status(500).json({
+        msg: "Internal Server Error",
+        data: null,
+      });
+    }
+  }
+);
+
+eventRouter.post(
+  "/getPageViewCount",
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    try {
+      const { data, error } = pageViewCountSchema.safeParse(req.body);
+
+      if (error) {
+        return res.status(400).json({
+          msg: "Bad Request",
+          data: null,
+        });
+      }
+
+      const { projectId, fromDate, toDate } = data;
+
+      const viewcount = await prisma.event.count({
+        where: {
+          projectId,
+          event: "viewpage",
+          timestamp: {
+            gte: fromDate,
+            lte: toDate,
+          },
+          path: {
+            not: null,
+          },
+        },
+      });
+
+      const result = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
+        `
+        SELECT COUNT(DISTINCT "distinctId") as count
+        FROM "Event"
+        WHERE "projectId" = $1
+          AND "event" = 'viewpage'
+          AND "timestamp" >= $2
+          AND "timestamp" <= $3
+          AND "path" IS NOT NULL
+        `,
+        projectId,
+        fromDate,
+        toDate
+      );
+
+      const visitorCount = Number(result[0]?.count || 0);
+
+      if (!viewcount || !visitorCount) {
+        return res.status(404).json({
+          msg: "Events Not Found",
+          data: null,
+        });
+      }
+
+      return res.status(200).json({
+        msg: "pageview count fetched",
+        data: { viewcount, visitorCount },
       });
     } catch (error) {
       res.status(500).json({

@@ -43,11 +43,19 @@ export const captureEventWorker = new Worker(
         const pushEvent = await prisma.event.create({
           data: {
             event: data.eventType,
-            properties: data.metadata,
+            properties: data.eventData,
             projectId: project.id,
             userId: data.userId,
             distinctId: data.distictId,
             timestamp: new Date(data.metadata.timestamp),
+            path: data.metadata.path,
+            url: data.metadata.url,
+            referrer: data.metadata.referrer,
+            timezone: data.metadata.timezone,
+            language: data.metadata.language,
+            useragent: data.metadata.userAgent,
+            screenHeight: data.metadata.screen.height,
+            screenWidth: data.metadata.screen.width,
           },
         });
       });

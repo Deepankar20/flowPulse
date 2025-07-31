@@ -6,6 +6,7 @@ import SignInPage from "./pages/SignIn";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "@clerk/clerk-react";
 import ProjectAnalytics from "./pages/ProjectAnalytics";
+import CreateProject from "./pages/CreateProject";
 
 function App() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -34,6 +35,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ProjectAnalytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-project"
+          element={
+            <ProtectedRoute>
+              <CreateProject />
             </ProtectedRoute>
           }
         />

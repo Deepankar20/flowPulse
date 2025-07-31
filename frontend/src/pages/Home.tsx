@@ -1,5 +1,5 @@
 // HomePage.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Home,
   Plus,
@@ -23,39 +23,55 @@ import type { Project } from "../types";
 import { ProjectCard } from "../components/ProjectCard";
 import { ProjectListItem } from "../components/ProjectListItem";
 import { Navbar } from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const HomePage: React.FC = () => {
+  const { userId } = useAuth();
+
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  // Sample projects data
-  const projects: Project[] = [
-    {
-      id: 1,
-      name: "E-commerce Platform",
-      description:
-        "Modern React-based e-commerce solution with advanced features",
-      status: "Active",
-      progress: 75,
-      dueDate: "2024-02-15",
-      team: ["JD", "SM", "RP", "AK"],
-      priority: "High",
-      category: "Web Development",
-      lastUpdated: "2 hours ago",
-    },
-  ];
+  const [projects, setProjects] = useState<Project[]>([]);
+  const navigate = useNavigate();
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter =
-      filterStatus === "all" ||
-      project.status.toLowerCase() === filterStatus.toLowerCase();
-    return matchesSearch && matchesFilter;
+
+    return matchesSearch;
   });
+
+  const fetchAllProjects = async () => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/api/v1/project/allProjectsById`,
+        {
+          headers: {
+            Authorization: `Bearer ${userId}`,
+          },
+        }
+      );
+
+      if (!response.ok) return;
+
+      const data = await response.json();
+      console.log(data);
+      
+
+      setProjects(data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllProjects();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0B192C]">
@@ -125,7 +141,10 @@ const HomePage: React.FC = () => {
               </button>
             </div>
 
-            <button className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+            <button
+              onClick={() => navigate("/create-project")}
+              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+            >
               <Plus size={18} />
               <span>New Project</span>
             </button>

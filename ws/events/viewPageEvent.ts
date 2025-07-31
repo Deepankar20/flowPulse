@@ -7,7 +7,6 @@ import { Worker } from "bullmq";
 export default async function viewPageEvent({
   metadata,
   apiKey,
-  socket,
   distinctId,
   userId,
 }: viewPageEventType) {
