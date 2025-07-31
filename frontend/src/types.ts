@@ -24,3 +24,10 @@ export interface TableData {
   visitors: number;
   views: number;
 }
+
+export interface DateRange {
+  fromDate: Date | null;
+  toDate: Date;
+  rangeId: string;
+  label: string;
+}

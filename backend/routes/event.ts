@@ -295,6 +295,70 @@ eventRouter.post(
   }
 );
 
+eventRouter.post(
+  "/getViewsByDay",
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    try {
+      const { data, error } = pageViewCountSchema.safeParse(req.body);
+
+      if (error) {
+        return res.status(400).json({
+          msg: "Bad Request",
+          data: null,
+        });
+      }
+
+      const { fromDate, toDate, projectId } = data;
+      const result = await prisma.$queryRaw<
+        { date: string; pageviews: number }[]
+      >`
+      WITH date_series AS (
+        SELECT generate_series(
+          DATE(${fromDate}),
+          DATE(${toDate}),
+          INTERVAL '1 day'
+        )::date AS date
+      )
+      SELECT 
+        ds.date,
+        COUNT(e.*) AS pageviews
+      FROM date_series ds
+      LEFT JOIN "Event" e
+        ON DATE(e."timestamp") = ds.date
+        AND e."event" = 'viewpage'
+        AND e."projectId" = ${projectId}
+      GROUP BY ds.date
+      ORDER BY ds.date ASC;
+    `;
+
+      if (!result) {
+        return res.status(404).json({
+          msg: "Events Not Found",
+          data: null,
+        });
+      }
+
+      const cleaned = result.map((res) => {
+        return {
+          date: res.date,
+          views: Number(res.pageviews),
+        };
+      });
+
+      return res.status(200).json({
+        msg: "fetched pageview per day",
+        data: cleaned,
+      });
+    } catch (error) {
+      res.status(500).json({
+        msg: "Internal Server Error",
+        data: null,
+      });
+    }
+  }
+);
+
 eventRouter.get("/dailyActiveUser", async () => {});
 
 eventRouter.get("/weeklyActiveUser", async () => {});

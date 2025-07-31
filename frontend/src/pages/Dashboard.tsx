@@ -6,16 +6,10 @@ import { useParams } from "react-router-dom";
 import { DataTable } from "../components/dashboard/DataTable";
 import { StatCard } from "../components/dashboard/StatCard";
 import { TimeRangeSelector } from "../components/dashboard/TimeRangeSelector";
+import type { DateRange } from "../types";
 
 import type { TableData } from "../types";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
-interface DateRange {
-  fromDate: Date | null;
-  toDate: Date;
-  rangeId: string;
-  label: string;
-}
 
 const ProjectDashboard: React.FC = () => {
   const { userId } = useAuth();
@@ -30,8 +24,8 @@ const ProjectDashboard: React.FC = () => {
   const [dateRange, setDateRange] = useState<DateRange>({
     fromDate: null,
     toDate: new Date(),
-    rangeId: "alltime",
-    label: "All Time",
+    rangeId: "1year",
+    label: "1 year",
   });
 
   async function fetchPageViewCount(eventData: DateRange) {
