@@ -17,9 +17,9 @@ export default async function captureEvent({
       return;
     }
 
-    const sockets = apiKeyToSockets.get(apiKey);
-    if (sockets) {
-      for (const ws of sockets) {
+    const socket = apiKeyToSockets.get(apiKey);
+    if (socket) {
+      
         const payload = {
           type: "capture-dashboard",
           metadata,
@@ -31,9 +31,9 @@ export default async function captureEvent({
         };
         const message = JSON.stringify(payload);
 
-        ws.send(message);
+        socket.send(message);
       }
-    }
+    
 
     const job = await captureEventsQueue.add(
       "captureEvent",

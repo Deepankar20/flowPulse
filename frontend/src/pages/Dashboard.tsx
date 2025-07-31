@@ -1,6 +1,7 @@
 // ProjectDashboard.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProjectLayout from "../components/ProjectLayout";
+import { useSocket } from "../context/SocketContext";
 
 interface TableData {
   id: number;
@@ -11,7 +12,8 @@ interface TableData {
 }
 
 const ProjectDashboard: React.FC = () => {
-  // Sample data for tables
+
+
   const sampleData: TableData[] = [
     {
       id: 1,
@@ -133,7 +135,7 @@ const ProjectDashboard: React.FC = () => {
   );
 
   return (
-    <ProjectLayout currentPage="dashboard" pageTitle="Dashboard">
+    <ProjectLayout currentPage="dashboard" pageTitle="Dashboard" >
       <div className="space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -165,10 +167,7 @@ const ProjectDashboard: React.FC = () => {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <DataTable title="Pending Tasks" data={sampleData.slice(1, 4)} />
-          <DataTable
-            title="Revenue Breakdown"
-            data={sampleData.slice(0, 4)}
-          />
+          <DataTable title="Revenue Breakdown" data={sampleData.slice(0, 4)} />
         </div>
       </div>
     </ProjectLayout>

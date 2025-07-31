@@ -1,36 +1,57 @@
 import { MoreVertical, Calendar, Clock, Eye, Edit } from "lucide-react";
 import type { Project } from "../types";
+import { useNavigate } from "react-router-dom";
+import { useSocket } from "../context/SocketContext";
 
 const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-900 text-green-300 border-green-700";
-      case "Completed":
-        return "bg-blue-900 text-blue-300 border-blue-700";
-      case "On Hold":
-        return "bg-gray-700 text-gray-300 border-gray-600";
-      case "Pending":
-        return "bg-yellow-900 text-yellow-300 border-yellow-700";
-      default:
-        return "bg-gray-700 text-gray-300 border-gray-600";
-    }
-  };
+  switch (status) {
+    case "Active":
+      return "bg-green-900 text-green-300 border-green-700";
+    case "Completed":
+      return "bg-blue-900 text-blue-300 border-blue-700";
+    case "On Hold":
+      return "bg-gray-700 text-gray-300 border-gray-600";
+    case "Pending":
+      return "bg-yellow-900 text-yellow-300 border-yellow-700";
+    default:
+      return "bg-gray-700 text-gray-300 border-gray-600";
+  }
+};
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High":
-        return "text-red-400";
-      case "Medium":
-        return "text-yellow-400";
-      case "Low":
-        return "text-green-400";
-      default:
-        return "text-gray-400";
-    }
-  };
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case "High":
+      return "text-red-400";
+    case "Medium":
+      return "text-yellow-400";
+    case "Low":
+      return "text-green-400";
+    default:
+      return "text-gray-400";
+  }
+};
 
-export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 hover:border-gray-600 transition-all duration-300 group overflow-hidden">
+export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+  const navigate = useNavigate();
+  const { setApiKey } = useSocket();
+
+  function handleClick() {
+    const newKey = project.name;
+    setApiKey(newKey);
+    if (newKey) {
+      localStorage.setItem("apiKey", newKey);
+    } else {
+      localStorage.removeItem("apiKey");
+    }
+
+    navigate(`/project/${project.id}/dashboard`);
+  }
+
+  return (
+    <div
+      onClick={handleClick}
+      className="bg-gray-800 rounded-xl border border-gray-700 hover:border-gray-600 transition-all duration-300 group overflow-hidden"
+    >
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -122,3 +143,4 @@ export const ProjectCard: React.FC<{ project: Project }> = ({ project }) => (
       </div>
     </div>
   );
+};

@@ -5,21 +5,19 @@ import viewPageEvent from "./events/viewPageEvent";
 import { formatDuration } from "./utils/formatDuration";
 import captureEvent from "./events/captureEvent";
 import { apiKeyToSockets } from "./InMemory/ApiKeyToSocketID";
+import validateApiKey from "./auth/auth";
 
 const PORT = 8080;
 const server = http.createServer();
 
-function isValidApiKey(apiKey: string): boolean {
-  return true;
-}
-
 server.on("upgrade", (req, socket, head) => {
-
   const { query } = url.parse(req.url || "", true);
+  console.log(query);
+
   const apiKey = query.apiKey as string;
 
   if (query.role === "admin") {
-    if (!apiKey || !isValidApiKey(apiKey)) {
+    if (!apiKey) {
       socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
       socket.destroy();
       return;
@@ -28,41 +26,42 @@ server.on("upgrade", (req, socket, head) => {
 
   const wss = new WebSocketServer({ noServer: true });
 
-  wss.handleUpgrade(req, socket, head, (ws) => {
+  wss.handleUpgrade(req, socket, head, async (ws) => {
     if (query.role === "admin" && apiKey) {
+      console.log("new conn", ws);
+      console.log(apiKeyToSockets);
+      
+
       if (!apiKeyToSockets.has(apiKey)) {
-        apiKeyToSockets.set(apiKey, new Set());
+        // const validate = await validateApiKey(apiKey);
+        const validate = true;
+
+        if (validate) {
+          apiKeyToSockets.set(apiKey, ws);
+        }
+      } else {
+        apiKeyToSockets.set(apiKey, ws);
       }
-      apiKeyToSockets.get(apiKey)!.add(ws);
 
       ws.on("close", () => {
-        const sockets = apiKeyToSockets.get(apiKey);
-        if (sockets) {
-          sockets.delete(ws);
-          if (sockets.size === 0) {
-            apiKeyToSockets.delete(apiKey);
-          }
+        if (apiKeyToSockets.has(apiKey)) {
+          apiKeyToSockets.delete(apiKey);
         }
       });
 
       ws.on("error", (error) => {
         console.error("Admin WebSocket error:", error);
-        const sockets = apiKeyToSockets.get(apiKey);
-        if (sockets) {
-          sockets.delete(ws);
-          if (sockets.size === 0) {
-            apiKeyToSockets.delete(apiKey);
-          }
-        }
+        apiKeyToSockets.delete(apiKey);
       });
     }
-    
+
     handleConnection(ws);
   });
 });
 
 function handleConnection(ws: WebSocket) {
   ws.on("error", console.error);
+  console.log(apiKeyToSockets);
 
   ws.on("message", (data) => {
     const message = typeof data === "string" ? data : data.toString();

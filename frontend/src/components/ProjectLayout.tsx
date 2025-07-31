@@ -1,5 +1,5 @@
 // components/ProjectLayout.tsx
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import {
   Home,
@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import ClerkButton from "./ClerkButton";
+import { useSocket } from "../context/SocketContext";
 
 interface ProjectLayoutProps {
   children: ReactNode;
@@ -25,6 +26,8 @@ const ProjectLayout: React.FC<ProjectLayoutProps> = ({
 }) => {
   const { projectId } = useParams<{ projectId: string }>();
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+
+  // Sample data for tables
 
   const sidebarItems = [
     {
@@ -56,6 +59,12 @@ const ProjectLayout: React.FC<ProjectLayoutProps> = ({
       name: "Settings",
       icon: <Settings size={20} />,
       path: `/project/${projectId}/settings`,
+    },
+    {
+      id: "home",
+      name: "home",
+      icon: <Home size={20} />,
+      path: "/",
     },
   ];
 

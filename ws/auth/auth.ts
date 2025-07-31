@@ -1,31 +1,18 @@
-import fetch from "node-fetch"; // remove if using native fetch (Node 18+)
-
-export default async function authenticateApiKey(
-  apiKey: string
-): Promise<string | null> {
+export default async function validateApiKey(apiKey: string): Promise<boolean> {
   try {
-    const res = await fetch("", {
+    const res = await fetch("localhost:3000/api/v1/validate-api-key", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey, // or send in body, per your backend's spec
+        "x-api-key": apiKey,
       },
       body: JSON.stringify({ apiKey }),
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) return false;
 
-    const data = await res.json();
-    // Adjust to your backend's response structure
-    if (!data) {
-      return null;
-    }
-    if (data) {
-      return apiKey;
-    } else {
-      return null;
-    }
+    return true;
   } catch (err) {
-    return null;
+    return false;
   }
 }
