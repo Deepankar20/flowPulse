@@ -32,12 +32,52 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
   const [viewsChart, setViewsChart] =
     useState<{ date: string; views: number }[]>();
 
+  const [visitorsChart, setVisitorsChart] =
+    useState<{ date: string; visitors: number }[]>();
+
   const [dateRange, setDateRange] = useState<DateRange>({
     fromDate: new Date(),
     toDate: new Date(),
     rangeId: "1year",
     label: "1 year",
   });
+
+  async function fetchDailyActiveUser(daterange: DateRange) {
+    try {
+      const requestData = {
+        projectId: parseInt(projectId || "0"),
+        fromDate: daterange.fromDate?.toISOString() || null,
+        toDate: daterange.toDate.toISOString(),
+      };
+
+      const res = await fetch(`${BACKEND_URL}/api/v1/event/dailyActiveUser`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userId}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      const raw = data.data;
+
+      const Chart = raw?.map((d: any) => ({
+        date: new Date(d.date).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+        visitors: d.visitors,
+      }));
+
+      setVisitorsChart(Chart);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async function fetchViewsByDay(daterange: DateRange) {
     try {
@@ -71,7 +111,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
       }));
 
       setViewsChart(viewsChart);
-      console.log(viewsChart);
     } catch (error) {
       console.log(error);
     }
@@ -79,11 +118,13 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
 
   useEffect(() => {
     fetchViewsByDay(dateRange);
+    fetchDailyActiveUser(dateRange);
   }, [projectId, dateRange]);
 
   const handleRangeChange = (range: DateRange) => {
     setDateRange(range);
     fetchViewsByDay(range);
+    fetchDailyActiveUser(range);
   };
 
   // Transform data for charts
@@ -148,14 +189,13 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
           </div>
         </div>
 
-        {/* Revenue Chart */}
         <div className="bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700">
           <h3 className="text-lg font-semibold text-white mb-4">
             Unique Visitors
           </h3>
           <div style={{ height: "450px" }}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={viewsChart}>
+              <LineChart data={visitorsChart}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis
                   dataKey="date"
@@ -173,11 +213,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
                     borderRadius: "6px",
                     color: "#F3F4F6",
                   }}
-                  formatter={(value: any) => [`$${value}k`, "Revenue"]}
                 />
                 <Line
                   type="monotone"
-                  dataKey="revenue"
+                  dataKey="visitors"
                   stroke="#10B981"
                   strokeWidth={3}
                   dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
@@ -192,7 +231,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
       {/* Bottom Row - Secondary Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Users Chart */}
-        <div className="bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700">
+        {/* <div className="bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700">
           <h3 className="text-lg font-semibold text-white mb-4">User Growth</h3>
           <div style={{ height: "450px" }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -227,10 +266,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </div> */}
 
         {/* Session Duration Chart */}
-        <div className="bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700">
+        {/* <div className="bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-700">
           <h3 className="text-lg font-semibold text-white mb-4">
             Average Session Duration
           </h3>
@@ -267,7 +306,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ data }) => {
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Summary Stats */}

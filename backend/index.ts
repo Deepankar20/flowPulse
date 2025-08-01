@@ -7,6 +7,7 @@ import { captureEventWorker } from "./workers/captureEventWorker";
 import { eventRouter } from "./routes/event";
 import { projectRouter } from "./routes/project";
 import { authMiddleware } from "./middleware/authMiddleware";
+import { userRouter } from "./routes/user";
 viewPageWorker;
 captureEventWorker;
 
@@ -24,6 +25,7 @@ app.use("/api/v1/", apiKeyRouter);
 app.use("/api/v1/app", appRouter);
 app.use("/api/v1/event/", eventRouter);
 app.use("/api/v1/project/", projectRouter);
+app.use("/api/v1/user", userRouter)
 
 app.listen(3000, () => {
   console.log("backend server running on 3000.....");

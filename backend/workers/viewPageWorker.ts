@@ -3,13 +3,9 @@ import prisma from "../db/db";
 import IOredis from "ioredis";
 import { viewPageSchema } from "../types";
 
-/**
-
- const prodConnection = new IOredis(process.env.UPSTASH_REDIS_URL as string, {
-   maxRetriesPerRequest: null,
- });
-
- */
+const prodConnection = new IOredis(process.env.UPSTASH_REDIS_URL as string, {
+  maxRetriesPerRequest: null,
+});
 
 const devConnection = new IOredis({
   maxRetriesPerRequest: null,
@@ -56,6 +52,9 @@ export const viewPageWorker = new Worker(
             useragent: data.metadata.userAgent,
             screenHeight: data.metadata.screen.height,
             screenWidth: data.metadata.screen.width,
+            latitude: data.metadata.latitude,
+            longitude: data.metadata.longitude,
+            browser: data.metadata.browser,
           },
         });
       });
@@ -63,5 +62,5 @@ export const viewPageWorker = new Worker(
       console.log(error);
     }
   },
-  { connection: devConnection }
+  { connection: prodConnection }
 );

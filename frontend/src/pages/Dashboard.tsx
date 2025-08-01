@@ -28,6 +28,8 @@ const ProjectDashboard: React.FC = () => {
     label: "1 year",
   });
 
+  
+
   async function fetchPageViewCount(eventData: DateRange) {
     try {
       const requestData = {
@@ -127,12 +129,16 @@ const ProjectDashboard: React.FC = () => {
   const handleRangeChange = (range: DateRange) => {
     setDateRange(range);
     fetchPathData(range);
+    fetchViewPageEvents(range, "timezone");
+    fetchViewPageEvents(range, "browser");
+    fetchViewPageEvents(range, "language");
+    fetchPageViewCount(range);
   };
 
   useEffect(() => {
     fetchPathData(dateRange);
     fetchViewPageEvents(dateRange, "timezone");
-    fetchViewPageEvents(dateRange, "useragent");
+    fetchViewPageEvents(dateRange, "browser");
     fetchViewPageEvents(dateRange, "language");
     fetchPageViewCount(dateRange);
   }, [projectId, dateRange]);
@@ -180,7 +186,7 @@ const ProjectDashboard: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <DataTable
             title="Browser"
-            data={viewPageTableData?.get("useragent")?.slice(0, 3)}
+            data={viewPageTableData?.get("browser")?.slice(0, 3)}
           />
           <DataTable
             title="Language"

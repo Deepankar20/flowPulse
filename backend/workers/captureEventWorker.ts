@@ -3,13 +3,11 @@ import prisma from "../db/db";
 import IOredis from "ioredis";
 import { captureEventSchema } from "../types";
 
-/**
-
  const prodConnection = new IOredis(process.env.UPSTASH_REDIS_URL as string, {
    maxRetriesPerRequest: null,
  });
 
- */
+
 
 const devConnection = new IOredis({
   maxRetriesPerRequest: null,
@@ -56,6 +54,9 @@ export const captureEventWorker = new Worker(
             useragent: data.metadata.userAgent,
             screenHeight: data.metadata.screen.height,
             screenWidth: data.metadata.screen.width,
+            latitude: data.metadata.latitude,
+            longitude: data.metadata.longitude,
+            browser: data.metadata.browser,
           },
         });
       });
@@ -63,5 +64,5 @@ export const captureEventWorker = new Worker(
       console.log(error);
     }
   },
-  { connection: devConnection }
+  { connection: prodConnection }
 );

@@ -12,7 +12,6 @@ const server = http.createServer();
 
 server.on("upgrade", (req, socket, head) => {
   const { query } = url.parse(req.url || "", true);
-  console.log(query);
 
   const apiKey = query.apiKey as string;
 

@@ -48,7 +48,10 @@ const userMetadataSchema = z.object({
     width: z.number(),
     height: z.number(),
   }),
-  timestamp: z.number(), // Number (as per your requirements)
+  timestamp: z.number(),
+  latitude: z.number(),
+  longitude: z.number(),
+  browser: z.string(), // Number (as per your requirements)
 });
 
 export const viewPageSchema = z.object({
@@ -65,6 +68,9 @@ export const viewPageSchema = z.object({
       height: z.number(),
     }),
     timestamp: z.number(),
+    latitude: z.number(),
+    longitude: z.number(),
+    browser: z.string(),
   }),
   userId: z.number().nullable(), // Allow null for anonymous users
   distinctId: z.string(),

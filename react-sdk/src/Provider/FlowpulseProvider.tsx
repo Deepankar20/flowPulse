@@ -1,8 +1,10 @@
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getUserMetaData } from "../utils/getUserMetadata";
+import { getGeoLocation, getUserMetaData } from "../utils/getUserMetadata";
 import { getOrCreateDistinctId } from "../utils/getDistinctId";
 import type { FlowPulseContextType, FlowPulseProviderType } from "../types";
+import { getParsedBrowserInfo } from "../utils/getBrowser";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const FlowPulseContext = createContext<FlowPulseContextType | undefined>(
   undefined
@@ -31,18 +33,6 @@ export const FlowPulseProvider = ({
       setIsReady(false);
     };
 
-    /** 
-    socket.onmessage = (event) => {
-      try {
-        const type = event.type;
-
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    */
-
     wsRef.current = socket;
     window.addEventListener("beforeunload", beforeUnload);
 
@@ -70,10 +60,19 @@ export const FlowPulseProvider = ({
     }
   };
 
-  const viewPage = () => {
+  const viewPage = async () => {
     if (wsRef.current && wsRef.current.readyState === wsRef.current?.OPEN) {
       try {
-        const metadata = getUserMetaData();
+        const meta = getUserMetaData();
+        const browser = getParsedBrowserInfo();
+        const location = await getGeoLocation();
+
+        const metadata = {
+          ...meta,
+          browser: browser as string,
+          latitude: location?.lat,
+          longitude: location?.lng,
+        };
 
         const payload = {
           type: "viewpage",
@@ -92,11 +91,19 @@ export const FlowPulseProvider = ({
     }
   };
 
-  const capture = (eventType: string, eventData: object) => {
+  const capture = async (eventType: string, eventData: object) => {
     if (wsRef.current && wsRef.current.readyState === wsRef.current.OPEN) {
       try {
-        const metadata = getUserMetaData();
+        const meta = getUserMetaData();
+        const browser = getParsedBrowserInfo();
+        const location = await getGeoLocation();
 
+        const metadata = {
+          ...meta,
+          browser: browser as string,
+          latitude: location?.lat,
+          longitude: location?.lng,
+        };
         const payload = {
           type: "capture",
           metadata,
@@ -115,9 +122,12 @@ export const FlowPulseProvider = ({
     }
   };
 
-  const identify = async (distinctId: string, properties: object) => {
+  const identify = async (
+    distinctId: string,
+    properties: { email: string; name: string }
+  ) => {
     try {
-      const res = await fetch(`${process.env.BACKEND_URL}/user/identify`, {
+      const res = await fetch(`${BACKEND_URL}/api/v1/user/identify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,12 +137,15 @@ export const FlowPulseProvider = ({
           distinctId,
           apiKey,
           properties,
+          email: properties.email,
+          name: properties.name,
         }),
       });
 
       if (!res.ok) return null;
 
       const data = await res.json();
+      localStorage.setItem("userId", data.data.userId);
     } catch (error) {
       console.log(error);
     }
@@ -145,4 +158,11 @@ export const FlowPulseProvider = ({
       {children}
     </FlowPulseContext.Provider>
   );
+};
+
+export const useFlowPulse = () => {
+  const ctx = useContext(FlowPulseContext);
+  if (!ctx)
+    throw new Error("useFlowPulse must be used inside FlowPulseProvider");
+  return ctx;
 };

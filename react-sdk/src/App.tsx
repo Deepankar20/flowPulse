@@ -3,9 +3,11 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import { useNavigate } from "react-router-dom";
 import "./App.css";
+import { useFlowPulse } from "./Provider/FlowpulseProvider";
 
 function App() {
   const [count, setCount] = useState(0);
+  const { capture, identify } = useFlowPulse();
   const router = useNavigate();
 
   return (
@@ -20,7 +22,16 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => router("/new")}>count is {count}</button>
+        <button
+          onClick={() =>
+            identify(localStorage.getItem("distinctId") as string, {
+              email: "user_email_address@something.com",
+              name: "<user_name>",
+            })
+          }
+        >
+          count is {count}
+        </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>

@@ -2,24 +2,23 @@ import { Queue } from "bullmq";
 
 import IOredis from "ioredis";
 
-/**
 
  const prodConnection = new IOredis(process.env.UPSTASH_REDIS_URL as string, {
    maxRetriesPerRequest: null,
  });
 
- */
+ 
 
 const devConnection = new IOredis({
   maxRetriesPerRequest: null,
 });
 
 export const pageViewEventQueue = new Queue("pageViewEventQueue", {
-  connection: devConnection,
+  connection: prodConnection,
 });
 
 export const captureEventsQueue = new Queue("captureEventQueue", {
-  connection: devConnection,
+  connection: prodConnection,
 });
 
 pageViewEventQueue.on("error", (err) =>

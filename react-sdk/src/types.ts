@@ -6,7 +6,10 @@ export type FlowPulseContextType = {
   apiKey: string;
   viewPage: () => void;
   capture: (eventType: string, eventData: object) => void;
-  identify: (distictId: string, properties: object) => void;
+  identify: (
+    distictId: string,
+    properties: { email: string; name: string }
+  ) => void;
 };
 
 export type FlowPulseProviderType = {
