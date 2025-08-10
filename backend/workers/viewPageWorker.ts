@@ -20,6 +20,8 @@ export const viewPageWorker = new Worker(
       const { data, error } = viewPageSchema.safeParse(jobData);
 
       if (error) {
+        console.log("error occured", error);
+
         return;
       }
 

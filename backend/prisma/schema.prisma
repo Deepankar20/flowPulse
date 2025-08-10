@@ -61,8 +61,8 @@ model Event {
   screenWidth  Int?
   screenHeight Int?
 
-  latitude  Float?
-  longitude Float?
+  latitude  Decimal? @db.Decimal(10, 2)
+  longitude Decimal? @db.Decimal(10, 2)
   browser   String?
 
   properties Json?

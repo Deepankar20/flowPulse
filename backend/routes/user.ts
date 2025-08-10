@@ -14,12 +14,22 @@ userRouter.post("/identify", async (req: Request, res: Response) => {
   }
 
   try {
-    const newUser = await prisma.$transaction(async (tx) => {
+    const [newUser, existingUser] = await prisma.$transaction(async (tx) => {
       const appExist = await prisma.project.findFirst({
         where: {
           apiKey: data.data.apiKey,
         },
       });
+
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          email: data.data.email,
+        },
+      });
+
+      if (existingUser) {
+        return [null, existingUser];
+      }
 
       const newUser = await prisma.user.create({
         data: {
@@ -39,10 +49,19 @@ userRouter.post("/identify", async (req: Request, res: Response) => {
         },
       });
 
-      return newUser;
+      return [newUser, existingUser];
     });
 
-    res.status(200).json({
+    if (!newUser && existingUser) {
+      return res.status(200).json({
+        msg: "successfully identified user",
+        data: {
+          userId: existingUser.id,
+        },
+      });
+    }
+
+    return res.status(200).json({
       msg: "successfully identified user",
       data: {
         userId: newUser.id,

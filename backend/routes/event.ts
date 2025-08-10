@@ -5,6 +5,7 @@ import {
   getAllEventsSchema,
   getEventsGroupByValue,
   pageViewCountSchema,
+  uniqueEventSchema,
   type AuthRequest,
 } from "../types";
 import { authMiddleware } from "../middleware/authMiddleware";
@@ -409,7 +410,6 @@ eventRouter.post(
           visitors: Number(res.visitors),
         };
       });
-      
 
       return res.status(200).json({
         msg: "fetched visitors per day",
@@ -425,3 +425,68 @@ eventRouter.post(
 );
 
 eventRouter.get("/weeklyActiveUser", async () => {});
+
+eventRouter.get(
+  "/getUniqueEvents",
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    try {
+      const { data, error } = uniqueEventSchema.safeParse(req.body);
+
+      if (error) {
+        return res.status(400).json({
+          msg: "Bad Request",
+          data: null,
+        });
+      }
+
+      const { fromDate, toDate, projectId, event } = data;
+
+      const result = await prisma.$queryRaw<
+        { date: string; visitors: number }[]
+      >`
+    WITH date_series AS (
+      SELECT generate_series(
+        DATE(${fromDate}),
+        DATE(${toDate}),
+        INTERVAL '1 day'
+      )::date AS date
+    )
+    SELECT 
+      ds.date,
+      COUNT(DISTINCT e."distinctId") AS visitors
+    FROM date_series ds
+    LEFT JOIN "Event" e
+      ON DATE(e."timestamp") = ds.date
+      AND e."event" = ${event}
+      AND e."projectId" = ${projectId}
+    GROUP BY ds.date
+    ORDER BY ds.date ASC;
+  `;
+
+      if (!result) {
+        return res.status(404).json({
+          msg: "Events Not Found",
+          data: null,
+        });
+      }
+
+      const cleaned = result.map((res) => {
+        return {
+          date: res.date,
+          visitors: Number(res.visitors),
+        };
+      });
+
+      return res.status(200).json({
+        msg: "fetched visitors for event",
+        data: cleaned,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        msg: "Internal Server Error",
+        data: null,
+      });
+    }
+  }
+);

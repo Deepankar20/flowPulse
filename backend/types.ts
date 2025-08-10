@@ -33,7 +33,7 @@ export type captureEventType = {
   socket: WebSocket;
   eventType: string;
   eventData: object;
-  userId: string | null;
+  userId: number | null;
   distinctId: string | null;
 };
 
@@ -103,6 +103,14 @@ export const createProjectSchema = z.object({
 
 export const pageViewCountSchema = z.object({
   projectId: z.number(),
+
+  fromDate: z.preprocess((val) => new Date(val as string), z.date()),
+  toDate: z.preprocess((val) => new Date(val as string), z.date()),
+});
+
+export const uniqueEventSchema = z.object({
+  projectId: z.number(),
+  event: z.string(),
 
   fromDate: z.preprocess((val) => new Date(val as string), z.date()),
   toDate: z.preprocess((val) => new Date(val as string), z.date()),
