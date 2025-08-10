@@ -25,8 +25,8 @@ function App() {
         <button
           onClick={() =>
             identify(localStorage.getItem("distinctId") as string, {
-              email: "user_email_address@something.com",
-              name: "<user_name>",
+              email: "user_email_address@something2.com",
+              name: "<user_name>2",
             })
           }
         >

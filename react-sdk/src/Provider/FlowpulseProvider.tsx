@@ -18,14 +18,19 @@ export const FlowPulseProvider = ({
   const [isReady, setIsReady] = useState<boolean>(false);
   const wsRef = useRef<WebSocket | null>(null);
   const [distinctId, setDistinctId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const sessionStartRef = useRef<number>(0);
   const location = useLocation();
 
   useEffect(() => {
     const socket = new WebSocket("ws://localhost:8080");
     const newDistictId = getOrCreateDistinctId();
+    const localStorageItem = localStorage.getItem("userId");
+    const userID = localStorageItem ? parseInt(localStorageItem) : 0;
+    setUserId(userID);
+
     setDistinctId(newDistictId);
+    console.log(distinctId);
     sessionStartRef.current = Date.now();
 
     socket.onopen = () => setIsReady(true);

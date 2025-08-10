@@ -4,7 +4,7 @@ import viewPageEvent from "./events/viewPageEvent";
 export type viewPageEventType = {
   apiKey: string;
   metadata: userMetadataType;
-  userId: string | null;
+  userId: number | null;
   distinctId: string | null;
 };
 
@@ -14,7 +14,7 @@ export type captureEventType = {
   socket: WebSocket;
   eventType: string;
   eventData: object;
-  userId: string | null;
+  userId: number | null;
   distinctId: string | null;
 };
 
